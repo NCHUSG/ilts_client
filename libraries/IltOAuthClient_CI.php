@@ -25,12 +25,10 @@ class IltOAuthClient {
         }
         else {
             // redirect部分要再確認通道是http or https
-            $scope = 'none';
-
             header( 'Location: ' . $this->auth_srv_url .
                     '?client_key=' . $this->client_key .
                     '&redirect_uri=' . urlencode('http://' . $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']) .
-                    '&scope=' . $scope);
+                    '&scope=' . $this->scope);
             return;
         }
 
