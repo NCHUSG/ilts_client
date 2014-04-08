@@ -22,17 +22,17 @@ class IltOAuthClient {
 
         if ( true == (isset($_GET['token']) && !empty($_GET['token'])) ) {
             $token = $_GET['token'];
+            return $this->get_data($token);
         }
         else {
             // redirect部分要再確認通道是http or https
-            header( 'Location: ' . $this->auth_srv_url .
+            $uri =  $this->auth_srv_url .
                     '?client_key=' . $this->client_key .
                     '&redirect_uri=' . urlencode('http://' . $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']) .
-                    '&scope=' . $this->scope);
-            return;
-        }
+                    '&scope=' . $this->scope;
 
-        return $this->get_data($token);
+            header( 'Location: ' . $uri ) or exit('Client redirect failed!');
+        }
 
     }
 
