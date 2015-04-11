@@ -36,6 +36,24 @@ class IltOAuthClient {
 
     }
 
+    private function getPage($url) {
+        if(strpos($url,"https") == 0){
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+            curl_setopt($ch, CURLOPT_HEADER, false);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_REFERER, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+            $result = curl_exec($ch);
+            curl_close($ch);
+            return $result;
+        }else{
+            return file_get_contents($url);
+        }
+
+    }
+
     private function get_data($token)
     {
         $res_url    = $this->res_srv_url .
@@ -43,9 +61,16 @@ class IltOAuthClient {
                         '&client_key=' . $this->client_key .
                         '&client_secret=' . $this->client_secret;
 
-        $data_json  = file_get_contents($res_url);
+        $data_json  = $this->getPage($res_url);
         $data_arr   = json_decode($data_json);
-        return empty($data_arr) ? false : $data_arr;
+
+        if (empty($data_arr))
+            throw new Exception("OAuth Resource Server Replied Nothing...");
+
+        if ($data_arr->status > 1)
+            throw new Exception("OAuth Resource Server Replied an ERROR: ".$data_arr->msg);
+
+        return $data_arr;
     }
 
     public function setter($key = '', $secret = '', $host_url = '', $scope = '')
